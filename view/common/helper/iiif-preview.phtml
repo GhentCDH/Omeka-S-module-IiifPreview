@@ -1,0 +1,18 @@
+<?php
+use Omeka\Api\Exception\NotFoundException;
+
+$viewerPlugin = $this->plugin($config['viewerPlugin']);
+$translate = $this->plugin('translate');
+$displayViewer = $this->setting('iiifpreview_enabled', true);
+?>
+
+<div style="margin-top : 10px; margin-bottom : 10px;">
+    <?php
+    if ( $viewerPlugin ) {
+        echo $viewerPlugin($resource);
+    }
+    ?>
+    <div class="text-right" style="margin-top : 10px;">
+        <a href="<?= $this->iiifUrl($resource); ?>" title="<?php echo $translate('IIIF Manifest'); ?>" target="_blank"><img style="height: 30px" src="<?= $this->assetUrl('modules/IiifPreview/asset/img/iiif-logo.svg') ?>" /></a>
+    </div>
+</div>
