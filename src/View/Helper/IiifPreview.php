@@ -31,15 +31,25 @@ class IiifPreview extends AbstractHelper
      */
     public function __invoke(AbstractResourceEntityRepresentation $resource, array $options = []): string
     {
+        // valid resource?
         if (empty($resource)) {
             return '';
         }
 
         $view = $this->getView();
 
+        $pluginManager = $view->getHelperPluginManager();
+
         // check if IiifServer is active
-        $iiifServerIsActive = $view->getHelperPluginManager()->has('iiifUrl');
+        $iiifServerIsActive = $pluginManager->has('iiifUrl');
         if (!$iiifServerIsActive) {
+            return '';
+        }
+
+        // check if viewer is active
+        $viewer = $view->setting("iiifpreview_viewer", false);
+        $viewerPlugin = $viewer ? $this->viewers[$viewer] ?? false : false;
+        if ( !$viewerPlugin || !$pluginManager->has($viewerPlugin) ) {
             return '';
         }
 
@@ -62,7 +72,7 @@ class IiifPreview extends AbstractHelper
                 break;
         }
 
-        return $this->render($resource, $options);
+        return $this->render($resource, $viewerPlugin, $options);
     }
 
     /**
@@ -73,11 +83,9 @@ class IiifPreview extends AbstractHelper
      * @param string $resourceName
      * @return string Html code.
      */
-    protected function render($resource, array $options = []): string
+    protected function render(AbstractResourceEntityRepresentation $resource, string $viewerPlugin, array $options = []): string
     {
         $view = $this->view;
-        $viewer = $view->setting("iiifpreview_viewer", false);
-        $viewerPlugin = $viewer ? $this->viewers[$viewer] ?? false : false;
 
         return $view->partial('common/helper/iiif-preview', [
             'resource' => $resource,
