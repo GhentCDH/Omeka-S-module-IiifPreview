@@ -10,7 +10,8 @@ class IiifPreview extends AbstractHelper
 {
     protected $viewers = [
         'mirador' => 'mirador',
-        'universalviewer' => 'universalViewer'
+        'universalviewer' => 'universalViewer',
+        'diva' => 'diva'
     ];
 
     /**

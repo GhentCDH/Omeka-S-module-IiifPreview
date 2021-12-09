@@ -27,6 +27,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'value_options' => [
                     'mirador' => 'Mirador',
                     'universalviewer' => 'UniversalViewer',
+                    'diva' => 'Diva',
                 ]
             ],
             'attributes' => [
