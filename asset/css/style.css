@@ -1,0 +1,7 @@
+.mirador header {
+    min-height: 0 !important;
+    padding: 0;
+}
+div[role=main] > h1:first-of-type {
+    z-index: 10000;
+}

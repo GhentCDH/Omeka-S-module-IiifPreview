@@ -11,6 +11,7 @@ if (!class_exists(\Generic\AbstractModule::class)) {
 use Generic\AbstractModule;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\SharedEventManagerInterface;
+use Laminas\View\Renderer\RendererInterface;
 
 class Module extends AbstractModule
 {
@@ -29,8 +30,33 @@ class Module extends AbstractModule
         $sharedEventManager->attach(
             'Omeka\Controller\Admin\ItemSet',
             'view.show.after',
-            [$this, 'handleViewShowAfterItem']
+            [$this, 'handleViewShowAfterItemSet']
         );
+
+        // register css/js
+        $sharedEventManager->attach(
+            'Omeka\Controller\Admin\Item',
+            'view.layout',
+            array($this, 'adminAssets')
+        );
+        $sharedEventManager->attach(
+            'Omeka\Controller\Admin\ItemSet',
+            'view.layout',
+            array($this, 'adminAssets')
+        );
+        $sharedEventManager->attach(
+            'Omeka\Controller\Admin\Media',
+            'view.layout',
+            array($this, 'adminAssets')
+        );
+    }
+
+    public function adminAssets(Event $e)
+    {
+        $view = $e->getTarget();
+        if ($view instanceof RendererInterface) {
+            $view->headLink()->appendStylesheet($view->assetUrl('css/style.css', 'AdminPlus'));
+        }
     }
 
     public function handleViewShowAfterItem(Event $event): void
@@ -38,4 +64,11 @@ class Module extends AbstractModule
         $view = $event->getTarget();
         echo $view->IiifPreview($view->item);
     }
+
+    public function handleViewShowAfterItemSet(Event $event): void
+    {
+        $view = $event->getTarget();
+        echo $view->IiifPreview($view->itemSet);
+    }
+
 }
