@@ -1,7 +1,10 @@
+/* mirador fix: omeka-s sets global header size and padding */
 .mirador header {
     min-height: 0 !important;
     padding: 0;
 }
-div[role=main] > h1:first-of-type {
-    z-index: 10000;
+
+/* mirador fix: workspace-control-panel visible above admin title */
+.MuiAppBar-root {
+    z-index: 2;
 }
