@@ -1,0 +1,61 @@
+name: Zip Release Workflow
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger on version tags (e.g., v1.0.0)
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1"
+          extensions: mbstring, xml, json
+          coverage: none
+          tools: composer
+
+      - name: Install dependencies
+        run: |
+          if [ -f composer.json ]; then
+            composer install --no-dev --prefer-dist --no-progress
+          else
+            echo "No composer.json file found. Skipping dependency installation."
+          fi
+
+      - name: Extract module name and version
+        id: module-info
+        run: |
+          repo_name=$(basename $GITHUB_REPOSITORY)
+          name=${repo_name#"Omeka-S-module-"}
+          version=${GITHUB_REF#refs/tags/v}
+          echo "Module name: $name"
+          echo "Version: $version"
+          echo "MODULE_NAME=$name" >> "$GITHUB_ENV"
+          echo "MODULE_VERSION=$version" >> "$GITHUB_ENV"
+          echo "MODULE_ZIPFILE=$name-$version.zip" >> "$GITHUB_ENV"
+
+      - name: Debug environment variables
+        run: |
+          echo "MODULE_NAME=$MODULE_NAME"
+          echo "MODULE_VERSION=$MODULE_VERSION"
+
+      - name: Prepare .zip release
+        run: |
+          set
+          echo "Preparing release for $MODULE_NAME version $MODULE_VERSION"
+          rsync -ahv . "./$MODULE_NAME" --exclude '.*' --exclude '*.sh'
+          zip -r "./$MODULE_ZIPFILE" "./$MODULE_NAME"
+          rm -rf "./$MODULE_NAME"
+          ls -l *.zip
+
+      # Upload the .zip file to the GitHub release
+      - name: Upload .zip to release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: ${{ env.MODULE_ZIPFILE }}
+          token: ${{ secrets.GITHUB_TOKEN }}
